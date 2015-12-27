@@ -1,118 +1,95 @@
-(function () {
-	var window = this;
+(function (window, document) {
+    'use strict';
 
-	function assignClick (e) {
-		e.stopPropagation();
-		var expanded;
-		expanded = $(this).data('expanded');
-		expanded = !expanded;
-		
-		$(this).data('expanded', expanded);
+    var maxDepth = 4;
 
-		var child;
-		child = $(this).children();
+    // TODO: add AMD support
+    window.ronarr = {
+        init: function () {
+            return this;
+        },
 
-		console.log(this);
+        output: function (object, depth, element) {
+            var arrayToOutput, levelEl, divNodeParent, child,
+                i, j, k;
 
-		if (expanded)
-			$(child[1]).css({display: 'none'});
-		else
-			$(child[1]).css({display: 'block'});
-	}
+            if (depth === undefined) depth = 0;
 
-	ronarr = window.ronarr = function () {
-		return ronarr.ron.init ();
-	}
+            if ((depth++) >= maxDepth) {
+                depth = 0;
+                return;
+            }
 
-	ronarr.ron = ronarr.prototype = {
-		init: function () {
-			return this;
-		},
+            if (object && object.toString().indexOf('[object') !== -1) { // TODO: better check if object
+                arrayToOutput = Object.keys(object);
+            } else {
+                if (!object || object.length === 0 || typeof(object) === 'string') {
+                    throw new Error('Object is unprocessable.');
+                }
+                arrayToOutput = object; // we assume it is an Array
+            }
 
-		arr_output: function (objToOutput) {
-			var arrayToOutput, divNode, divNodeParent, child;
-			var i, j, k;
+            function createEl(id, elClass, content) {
+                var el;
 
-			function createDiv(divId, divClass, divHtml) {
-				var tempDiv;
+                el = document.createElement('div');
+                el.id = id;
+                el.className = elClass;
+                el.innerHTML = content;
 
-				tempDiv = document.createElement('div');
-				tempDiv.id = divId;
-				tempDiv.className = divClass;
-				tempDiv.innerHTML = divHtml;
+                return el;
+            }
 
-				return tempDiv;
-			}
+            function clickHandler (e) {
+                var target, expanded, idx;
 
-			$('#level').remove();
-				
-			divNodeParent = createDiv('level', 'test-class', '<h2>Click me to expand</h2><div class="test-body"><p></p></div>');
+                e.stopPropagation();
 
-			document.body.appendChild(divNodeParent);
+                target = e.target || e.srcElement;
 
-			divNodeParent.addEventListener('click', assignClick, false)
+                while (target.id.indexOf('level') === -1) {
+                    target = target.parentNode;
+                }
 
-			arrayToOutput = objToOutput;//;Object.keys(objToOutput);
+                if (target.className.indexOf('expanded') !== -1 ){
+                    target.className = target.className.replace(/(\s|^)expanded(\s|$)/, '');
+                } else {
+                    target.className += ' expanded';
+                }
+            }
 
-			for (i = 0; i < arrayToOutput.length; i++)
-			{
-				//if (Object.keys(objToOutput[i+1]) !== undefined)
-				//	arrayToOutput[i] = Object.keys(objToOutput[i+1]);
+            levelEl = document.getElementById('level'); // TODO: remove "used" element
 
-				if ((arrayToOutput[i].length > 1)&&(typeof(arrayToOutput[i]) !== 'string'))
-				{
-					divNodeParent = createDiv('level1' + i, 'test-class', '<h2>Click me to expand level1' + i + '</h2><div class="test-body"><p>' + arrayToOutput[i] + '</p></div>');
-					child = $('#level').children();
-					$(child[1]).append(divNodeParent);
-					divNodeParent.addEventListener('click', assignClick, false);
+            if (levelEl && levelEl.parentNode)
+                levelEl.parentNode.removeChild(levelEl);
 
-					for (j = 0; j < arrayToOutput[i].length; j++)
-					{
-						//arrayToOutput[i][j] = Object.keys(objToOutput[i+1][j+1]);
-					
-						if ((arrayToOutput[i][j].length > 1)&&(typeof(arrayToOutput[i][j]) !== 'string'))
-						{
-							divNodeParent = createDiv('level2' + i + j, 'test-class', '<h2>Click me to expand level2' + i + j + '</h2><div class="test-body"><p>' + arrayToOutput[i][j] + '</p></div>');
-							child = $('#level1' + i).children();
-							$(child[1]).append(divNodeParent);
-							divNodeParent.addEventListener('click', assignClick, false)
-							
-							for (k = 0; k < arrayToOutput[i][j].length; k++)
-							{
-								//arrayToOutput[i][j][k] = Object.keys(objToOutput[i+1][j+1][k+1]);
+            levelEl = createEl('level' + depth, 'test-class', '<h2>' + object.constructor.name + '</h2><div class="test-body"></div>');
 
-								if (arrayToOutput[i][j].length > 1) {
-									divNode = createDiv('level3' + i + j + k, 'test-class', '<h2>And me! level3' + i + j + k + '</h2><div class="test-body"><p>' + arrayToOutput[i][j][k] + '</p></div>');
-									child = $('#level2' + i + j).children();
-									$(child[1]).append(divNode);
-									divNode.addEventListener('click', assignClick, false)
-								}
-							}
-						}
-						else
-						{
-							divNode = createDiv('level2' + i + j, 'test-class', '<h2>And me!  level2' + i + j +'</h2><div class="test-body"><p>' + arrayToOutput[i][j] + '</p></div>');
-							child = $('#level1' + i).children();
-							$(child[1]).append(divNode);
-							divNode.addEventListener('click', assignClick, false)
-						}
-					}
-				}
-				else
-				{
-					divNode = createDiv('level1' + i,  'test-class', '<h2>And me! level1' + i + '</h2><div class="test-body"><p>' + arrayToOutput[i] + '</p></div>');
-					child = $('#level').children();
-					$(child[1]).append(divNode);
-					divNode.addEventListener('click', assignClick, false)
+            if (element) {
+                element.appendChild(levelEl);
+            }
+            else {
+                document.body.appendChild(levelEl);
+            }
 
-					//console.log(array_to_output[i]);
-				}
-			}
-			//$('level').html('</div>');
+            if (typeof addEventListener === 'function') // TODO: add IE support
+                levelEl.addEventListener('click', clickHandler, false);
 
-			return this;
-		}
-	}
+            for (i = 0; i < arrayToOutput.length; i++) {
+                var elBody = levelEl.getElementsByTagName('div')[0],
+                    childEl;
 
-	ronarr.ron.init.prototype = ronarr.ron;
-})();
+                if (object[arrayToOutput[i]] && Object.keys(object[arrayToOutput[i]]).length && typeof(object[arrayToOutput[i]]) !== 'string') {
+                    ronarr.output(object[arrayToOutput[i]], depth, elBody); // if object
+                } else {
+                    if (arrayToOutput[i].length && typeof arrayToOutput[i] !== 'string') { // if array
+                        ronarr.output(arrayToOutput[i], depth, elBody); // if nested
+                    } else {
+                        childEl = createEl('element-' + i, 'array-element', '<p>' + arrayToOutput[i] + '</p>');
+                        elBody.appendChild(childEl);
+                    }
+                }
+            }
+        }
+    }
+})(window, document);

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Test 1</title>
+	<script src="../ronarr.js"></script>
+	<style>
+		.test-class {
+			border-top-left-radius: 5;
+			border-top-right-radius: 5;
+			box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, 0.12);
+			-webkit-user-select: none;
+			user-select: none;
+		}
+		.test-class h2 {
+			background-color: #ccc;
+			margin: 0;
+			padding: 10px;
+		}
+		.test-class .test-body {
+			display: none;
+			box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, 0.12);
+			padding: 10px;
+		}
+		.test-class.expanded > .test-body {
+			display: block;
+		}
+	</style>
+</head>
+<body>
+	<script>
+		var obj = {
+		  "name": "experium-web",
+		  "version": "0.1.0",
+		  "devDependencies": {
+		    "bower": "~1.3.12",
+		    "connect-livereload": "~0.5.3",
+		    "grunt": {
+		    	"test": "~0.4.5",
+		    	"dist": "~0.5.1"
+		    }
+		  },
+		  "repository": {
+		    "type": "git",
+		    "url": "git://github.com/experium/experium-web.git"
+		  },
+		  "engines": {
+		    "node": ">=0.10.0"
+		  },
+		  "scripts": {
+		    "test": "grunt test",
+		    "prepublish": "./node_modules/protractor/bin/webdriver-manager update"
+		  }
+		},
+		arr = [[1,2,3,],[22,24,25,[35,36],[35,36,[46]],[25,26,27,28]]];
+
+		ronarr.output(arr);
+	</script>
+</body>
+</html>
